@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="logstash" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"event.dataset": "logging.log", "event.kind": "event"}</customFields>
+            <includeTags>true</includeTags>
+            <fieldNames>
+                <version>[ignore]</version>
+                <level>log.level</level>
+                <levelValue>[ignore]</levelValue>
+                <thread>process.thread.name</thread>
+                <logger>log.logger</logger>
+                <stackTrace>error.stack_trace</stackTrace>
+            </fieldNames>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>errorStackTrace</includeMdcKeyName>
+            <mdcKeyFieldName>traceId=trace.id</mdcKeyFieldName>
+            <mdcKeyFieldName>spanId=span.id</mdcKeyFieldName>
+            <mdcKeyFieldName>errorStackTrace=error.stack_trace</mdcKeyFieldName>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="logstash" />
+    </root>
+</configuration>
