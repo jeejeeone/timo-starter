@@ -1,6 +1,6 @@
 package fi.starter.backend
 
-import fi.starter.backend.LoggingSupport.{ errorAnnotation, logLayer, trackingAnnotation }
+import fi.starter.backend.LoggingSupport.{ logLayer, trackingAnnotation }
 import zhttp.http._
 import zhttp.service.Server
 import zio._
@@ -14,15 +14,10 @@ object Backend extends App {
         log.info("Some logging with traceId and spanId") *> ZIO.effectTotal(Response.text("Hello World!"))
       }
     case Method.GET -> Root / "cause" =>
-      trackingAnnotation(TrackingId("123"), SpanId("123123")) {
+      log.info("ok") *>
         ZIO
           .fail(Cause.fail("fail"))
-          .catchAllCause(cause =>
-            errorAnnotation(cause) {
-              log.error("msg", cause)
-            } *> ZIO.effectTotal(Response.text("Logging some causes"))
-          )
-      }
+          .catchAllCause(cause => log.error("msg", cause) *> ZIO.effectTotal(Response.text("Logging some causes")))
   }
 
   override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
