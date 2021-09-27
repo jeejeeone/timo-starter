@@ -3,26 +3,7 @@ package fi.starter.backend
 import zio.logging.LogAnnotation.optional
 import zio.logging.slf4j.Slf4jLogger
 import zio.logging.{ LogAnnotation, Logging, log }
-import zio.{ Cause, ULayer, ZIO }
-
-/* CAUSE DILEMMA with logstash encoder and zio logging slfj4 bridge */
-
-/*
-Motivation:
- log.throwable(msg, throwable) -> message -> msg, error.stack_trace -> stack trace
- log.error(msg, cause) -> message -> msg, STACK TRACE LOST
-
-Cause a zio construct incompatible with throwable, information is lost if logging
-with log.throwable
-
-Cause should be annotated with ErrorStackTrace but how to include this in the code base?
-
-Solutions:
-  - manual annotation, see errorAnnotation
-  - zio.logging.log.cause(msg, cause). How? Probably needs a fork essentially, not great
-  - inject logging as service, extend service and implement cause(..)
-  - Agree to only use log.throwable (doesn't seem ideal)
- */
+import zio.{ ULayer, ZIO }
 
 object LoggingSupport {
   val SpanIdAnnotation: LogAnnotation[Option[String]] =
