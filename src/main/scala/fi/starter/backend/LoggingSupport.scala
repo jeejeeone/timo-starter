@@ -25,12 +25,6 @@ Solutions:
  */
 
 object LoggingSupport {
-  val ErrorStackTraceAnnotation: LogAnnotation[Option[Cause[Any]]] =
-    optional[Cause[Any]](
-      name = "errorStackTrace",
-      _.prettyPrint
-    )
-
   val SpanIdAnnotation: LogAnnotation[Option[String]] =
     optional[String](
       name = "spanId",
@@ -43,10 +37,7 @@ object LoggingSupport {
       identity
     )
 
-  //TODO: Better naming
-  def errorAnnotation[Logging, E, A](cause: Cause[Any])(eff: ZIO[Logging, E, A]) =
-    log.locally(_.annotate(ErrorStackTraceAnnotation, Some(cause)))(eff)
-
+  //TODO: naming
   def trackingAnnotation[Logging, E, A](traceId: TrackingId, spanId: SpanId)(eff: ZIO[Logging, E, A]) =
     log.locally(_.annotate(TraceIdAnnotation, Some(traceId.value)).annotate(SpanIdAnnotation, Some(spanId.value)))(eff)
 
@@ -57,7 +48,7 @@ object LoggingSupport {
     log.locally(_.annotate(TraceIdAnnotation, Some(spanId.value)))(eff)
 
   val logLayer: ULayer[Logging] =
-    Slf4jLogger.makeWithAnnotationsAsMdc(List(ErrorStackTraceAnnotation, SpanIdAnnotation, TraceIdAnnotation))
+    Slf4jLogger.makeWithAnnotationsAsMdc(List(LogAnnotation.Cause, SpanIdAnnotation, TraceIdAnnotation))
 }
 
 case class SpanId(value: String)     extends AnyVal

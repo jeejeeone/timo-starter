@@ -14,10 +14,10 @@
             </fieldNames>
             <includeMdcKeyName>traceId</includeMdcKeyName>
             <includeMdcKeyName>spanId</includeMdcKeyName>
-            <includeMdcKeyName>errorStackTrace</includeMdcKeyName>
+            <includeMdcKeyName>cause</includeMdcKeyName>
             <mdcKeyFieldName>traceId=trace.id</mdcKeyFieldName>
             <mdcKeyFieldName>spanId=span.id</mdcKeyFieldName>
-            <mdcKeyFieldName>errorStackTrace=error.stack_trace</mdcKeyFieldName>
+            <mdcKeyFieldName>cause=error.stack_trace</mdcKeyFieldName>
         </encoder>
     </appender>
 
