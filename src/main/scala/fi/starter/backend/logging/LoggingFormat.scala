@@ -1,29 +1,28 @@
-package fi.starter.backend
+package fi.starter.backend.logging
 
 import zio.Cause
-import zio.logging.{ LogAnnotation, LogContext, LogFormat }
 import zio.json.EncoderOps
+import zio.logging.{LogAnnotation, LogContext, LogFormat}
+
 import scala.collection.immutable.ListMap
 
 object LoggingFormat {
   private val NL = System.lineSeparator()
 
-  val defautJsonFormat = EcsJsonFormat(Map("event.dataset" -> "logging.log", "event.kind" -> "event"))
-
   final case class EcsJsonFormat(customFields: Map[String, String] = Map()) extends LogFormat[String] {
     override def format(context: LogContext, line: String): String = {
-      val date       = context(LogAnnotation.Timestamp)
-      val level      = context(LogAnnotation.Level)
+      val date = context(LogAnnotation.Timestamp)
+      val level = context(LogAnnotation.Level)
       val loggerName = context(LogAnnotation.Name)
 
-      val maybeSpanId                 = context
-        .get(LoggingSupport.SpanIdAnnotation)
+      val maybeSpanId = context
+        .get(Annotations.SpanIdAnnotation)
         .map("span.id" -> _)
-      val maybeTraceId                = context
-        .get(LoggingSupport.TraceIdAnnotation)
+      val maybeTraceId = context
+        .get(Annotations.TraceIdAnnotation)
         .map("trace.id" -> _)
 
-      val maybeError                  = context
+      val maybeError = context
         .get(LogAnnotation.Throwable)
         .map(Cause.fail)
         .orElse(context.get(LogAnnotation.Cause))
@@ -32,9 +31,9 @@ object LoggingFormat {
 
       val fields: Map[String, String] = ListMap(
         "@timestamp" -> date,
-        "message"    -> line,
+        "message" -> line,
         "log.logger" -> loggerName,
-        "log.level"  -> level
+        "log.level" -> level
       ) ++ maybeError ++ maybeTraceId ++ maybeSpanId ++ customFields
 
       fields.toJson
