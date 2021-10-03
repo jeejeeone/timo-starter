@@ -11,45 +11,35 @@ import zio.logging.Logging.{addTimestamp, modifyLoggerM}
 import zio.logging.{LogAppender, LogFormat, LogLevel, Logging}
 
 object LoggingSupport {
-  private val configDescriptor: ConfigDescriptor[(Option[String], Option[Boolean])] =
-    (string("LOG_LEVEL_ROOT").optional |@| boolean("LOG_SIMPLE_FORMAT").optional).tupled
+  private val configDescriptor: ConfigDescriptor[(String, Boolean)] =
+    (string("LOG_LEVEL_ROOT").default("info") |@| boolean("LOG_SIMPLE_FORMAT").default(false)).tupled
 
   private val readConfig =
-    ConfigSource
-      .fromSystemProps
+    ConfigSource.fromSystemProps
       .map(source =>
-        read(configDescriptor from source)
-          .toOption
+        read(configDescriptor from source).toOption
           .map(config =>
             LoggingConfig(
               toLogLevel(config._1),
-              toLogFormat(config._2)
+              if (config._2) LogFormat.ColoredLogFormat() else defaultFormat
             )
           )
           .getOrElse(LoggingConfig(defaultLevel, defaultFormat))
       )
 
-  private def toLogLevel(level: Option[String]) = level match {
-    case Some("trace") => LogLevel.Trace
-    case Some("debug") => LogLevel.Debug
-    case Some("info") => LogLevel.Info
-    case Some("warn") => LogLevel.Warn
-    case Some("error") => LogLevel.Error
-    case Some("fatal") => LogLevel.Fatal
-    case Some("off") => LogLevel.Off
-    case _ => defaultLevel
-  }
-
-  private def toLogFormat(useSimpleFormat: Option[Boolean]) = useSimpleFormat match {
-    case Some(value) =>
-      if (value) LogFormat.ColoredLogFormat() else defaultFormat
-    case _ =>
-      defaultFormat
+  private def toLogLevel(level: String) = level match {
+    case "trace" => LogLevel.Trace
+    case "debug" => LogLevel.Debug
+    case "info"  => LogLevel.Info
+    case "warn"  => LogLevel.Warn
+    case "error" => LogLevel.Error
+    case "fatal" => LogLevel.Fatal
+    case "off"   => LogLevel.Off
+    case _       => defaultLevel
   }
 
   val logLayer =
-    readConfig
-      .toLayer
+    readConfig.toLayer
       .flatMap(config =>
         ZLayer.requires[Clock] ++
           (LogAppender.console[String](
@@ -58,7 +48,7 @@ object LoggingSupport {
           ) >>> withLoggerNameFromLine[String]) >+> Logging.make >>> modifyLoggerM(addTimestamp[String])
       )
 
-  val defaultLevel = LogLevel.Info
+  val defaultLevel  = LogLevel.Info
   val defaultFormat = EcsJsonFormat(Map("event.dataset" -> "logging.log", "event.kind" -> "event"))
 
   final case class LoggingConfig(rootLevel: LogLevel, loggingFormat: LogFormat[String])

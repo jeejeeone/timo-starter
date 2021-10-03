@@ -11,8 +11,8 @@ object LoggingFormat {
 
   final case class EcsJsonFormat(customFields: Map[String, String] = Map()) extends LogFormat[String] {
     override def format(context: LogContext, line: String): String = {
-      val date = context(LogAnnotation.Timestamp)
-      val level = context(LogAnnotation.Level)
+      val date       = context(LogAnnotation.Timestamp)
+      val level      = context(LogAnnotation.Level)
       val loggerName = context(LogAnnotation.Name)
 
       val maybeSpanId = context
@@ -31,9 +31,9 @@ object LoggingFormat {
 
       val fields: Map[String, String] = ListMap(
         "@timestamp" -> date,
-        "message" -> line,
+        "message"    -> line,
         "log.logger" -> loggerName,
-        "log.level" -> level
+        "log.level"  -> level
       ) ++ maybeError ++ maybeTraceId ++ maybeSpanId ++ customFields
 
       fields.toJson

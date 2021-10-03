@@ -33,9 +33,9 @@ object LogFiltering2 {
 
   def filterByTree[A](root: LogFilterNode): (LogContext, => A) => Boolean =
     (ctx, _) => {
-      val loggerName = ctx.get(LogAnnotation.Name)
+      val loggerName                    = ctx.get(LogAnnotation.Name)
       val withLoggerNameFromLineSupport = loggerName.lift(0).getOrElse("").split("\\.").toList
-      val logLevel = findMostSpecificLogLevel(withLoggerNameFromLineSupport ++ loggerName.drop(0), root)
+      val logLevel                      = findMostSpecificLogLevel(withLoggerNameFromLineSupport ++ loggerName.drop(0), root)
       ctx.get(LogAnnotation.Level) >= logLevel
     }
 
