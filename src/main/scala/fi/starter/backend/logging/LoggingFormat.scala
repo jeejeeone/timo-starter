@@ -2,7 +2,7 @@ package fi.starter.backend.logging
 
 import zio.Cause
 import zio.json.EncoderOps
-import zio.logging.{LogAnnotation, LogContext, LogFormat}
+import zio.logging.{ LogAnnotation, LogContext, LogFormat }
 
 import scala.collection.immutable.ListMap
 
@@ -15,14 +15,14 @@ object LoggingFormat {
       val level      = context(LogAnnotation.Level)
       val loggerName = context(LogAnnotation.Name)
 
-      val maybeSpanId = context
+      val maybeSpanId                 = context
         .get(Annotations.SpanIdAnnotation)
-        .map("span.id" -> _)
-      val maybeTraceId = context
+        .map("span.id" -> _.value)
+      val maybeTraceId                = context
         .get(Annotations.TraceIdAnnotation)
-        .map("trace.id" -> _)
+        .map("trace.id" -> _.value)
 
-      val maybeError = context
+      val maybeError                  = context
         .get(LogAnnotation.Throwable)
         .map(Cause.fail)
         .orElse(context.get(LogAnnotation.Cause))
