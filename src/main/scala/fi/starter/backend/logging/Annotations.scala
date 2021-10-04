@@ -21,5 +21,5 @@ object Annotations {
     log.locally(_.annotate(SpanIdAnnotation, Some(spanId)))(eff)
 }
 
-case class SpanId(value: String)
-case class TraceId(value: String)
+case class SpanId(value: String)  extends AnyVal
+case class TraceId(value: String) extends AnyVal
