@@ -1,8 +1,9 @@
 package fi.starter.backend
 
+import fi.starter.backend.logging.Annotations.SpanIdAnnotation
 import org.slf4j.MDC
 import zio.ZIO
-import zio.logging.{ Logging, log }
+import zio.logging.{Logging, log}
 
 import scala.jdk.CollectionConverters.MapHasAsJava
 
@@ -18,5 +19,11 @@ package object logging {
         try fn
         finally MDC.setContextMap(previous)
       }
+    }
+
+  def tracking(spanId: SpanId): Aspect[Logging, Nothing] =
+    new Aspect[Logging, Nothing] {
+      override def apply[R <: Logging, E, A](zio: ZIO[R, E, A]) =
+        log.locally(_.annotate(SpanIdAnnotation, Some(spanId)))(zio)
     }
 }
